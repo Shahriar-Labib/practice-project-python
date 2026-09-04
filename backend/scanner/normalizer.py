@@ -1,4 +1,5 @@
 from pathlib import Path
+from backend.scanner.risk_engine import calculate_risk
 
 def get_code_snippet(file_path, line_number):
     try:
@@ -60,17 +61,10 @@ def normalize_findings(semgrep_data):
 
         seen.add(duplicate_key)
 
-        semgrep_severity = extra.get(
-            "severity",
-            "WARNING"
+        severity = calculate_risk(
+            vulnerability,
+            metadata.get("confidence", "UNKNOWN")
         )
-
-        if semgrep_severity == "ERROR":
-            severity = "HIGH"
-        elif semgrep_severity == "WARNING":
-            severity = "MEDIUM"
-        else:
-            severity = "LOW"
 
         finding = {
             "vulnerability": vulnerability,
