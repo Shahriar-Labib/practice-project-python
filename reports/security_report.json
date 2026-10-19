@@ -1,0 +1,52 @@
+{
+    "project": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests",
+    "framework": "Java (framework not identified), FastAPI",
+    "scan_time_utc": "2026-10-19T19:47:58.894863+00:00",
+    "summary": {
+        "total_findings": 3,
+        "high": 2,
+        "medium": 1,
+        "low": 0
+    },
+    "findings": [
+        {
+            "vulnerability": "SQL Injection",
+            "semgrep_severity": "ERROR",
+            "severity": "HIGH",
+            "confidence": "MEDIUM",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\VulnerableController.java",
+            "line": 19,
+            "code": "String query = \"SELECT * FROM users WHERE username='\" + username + \"'\";",
+            "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+            "owasp": "A01:2017 - Injection",
+            "description": "User data flows into this manually-constructed SQL string. User data can be safely inserted into SQL strings using prepared statements or an object-relational mapper (ORM). Manually-constructed SQL strings is a possible indicator of SQL injection, which could let an attacker steal or manipulate data from the database. Instead, use prepared statements (`connection.PreparedStatement`) or a safe library.",
+            "recommendation": "Use java.sql.PreparedStatement with parameterized queries, or a safe ORM, instead of building SQL queries using user input."
+        },
+        {
+            "vulnerability": "SQL Injection",
+            "semgrep_severity": "ERROR",
+            "severity": "HIGH",
+            "confidence": "MEDIUM",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\VulnerableController.java",
+            "line": 22,
+            "code": "ResultSet result = statement.executeQuery(query);",
+            "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+            "owasp": "A01:2017 - Injection",
+            "description": "Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.",
+            "recommendation": "Use java.sql.PreparedStatement with parameterized queries, or a safe ORM, instead of building SQL queries using user input."
+        },
+        {
+            "vulnerability": "SQL Injection",
+            "semgrep_severity": "ERROR",
+            "severity": "MEDIUM",
+            "confidence": "LOW",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\python_test\\app.py",
+            "line": 14,
+            "code": "result = connection.execute(query).fetchall()",
+            "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+            "owasp": "A01:2017 - Injection",
+            "description": "Avoiding SQL string concatenation: untrusted input concatenated with raw SQL query can result in SQL Injection. In order to execute raw query safely, prepared statement should be used. SQLAlchemy provides TextualSQL to easily used prepared statement with named parameters. For complex SQL composition, use SQL Expression Language or Schema Definition Language. In most cases, SQLAlchemy ORM will be a better option.",
+            "recommendation": "Use parameterized SQL queries instead of string concatenation. For SQLite, use placeholders such as '?' and pass user input as query parameters."
+        }
+    ]
+}
