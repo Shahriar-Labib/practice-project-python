@@ -96,11 +96,15 @@ def generate_html_report(
 
             <div class="metadata">
                 <p>
+                    <strong>Rule ID:</strong>
+                    <code>{safe(finding.get("rule_id", "Unknown"))}</code>
+                </p>
+                <p>
                     <strong>File:</strong>
                     <code>{safe(finding.get("file", "Unknown"))}</code>
                 </p>
                 <p>
-                    <strong>Line:</strong>
+                    <strong>Reported line:</strong>
                     {safe(finding.get("line", "Unknown"))}
                 </p>
             </div>

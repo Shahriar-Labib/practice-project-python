@@ -4,11 +4,12 @@ from pathlib import Path
 from backend.scanner.risk_engine import calculate_risk
 
 
-def get_code_snippet(file_path, line_number):
+def get_code_snippet(file_path, line_number, context=2):
+    """Return the reported source line with nearby numbered lines."""
     try:
         path = Path(file_path)
 
-        if not path.exists():
+        if not path.is_file():
             return "Code snippet unavailable."
 
         lines = path.read_text(
@@ -16,13 +17,38 @@ def get_code_snippet(file_path, line_number):
             errors="replace"
         ).splitlines()
 
-        if line_number <= 0 or line_number > len(lines):
+        if not isinstance(line_number, int):
             return "Code snippet unavailable."
 
-        return lines[line_number - 1].strip()
+        if line_number < 1 or line_number > len(lines):
+            return "Code snippet unavailable."
 
-    except (OSError, ValueError):
+        start = max(1, line_number - context)
+        end = min(len(lines), line_number + context)
+        width = len(str(end))
+        snippet = []
+
+        for number in range(start, end + 1):
+            marker = ">" if number == line_number else " "
+            snippet.append(
+                f"{marker} {number:>{width}} | {lines[number - 1]}"
+            )
+
+        return "\n".join(snippet)
+
+    except (OSError, ValueError, TypeError):
         return "Code snippet unavailable."
+
+
+def first_metadata_value(value, default="Unknown"):
+    """Safely get the first value from Semgrep metadata."""
+    if isinstance(value, list):
+        return value[0] if value else default
+
+    if isinstance(value, str) and value.strip():
+        return value
+
+    return default
 
 
 def normalize_findings(semgrep_data):
@@ -30,34 +56,40 @@ def normalize_findings(semgrep_data):
     seen = set()
 
     for result in semgrep_data.get("results", []):
-        extra = result.get("extra", {})
-        metadata = extra.get("metadata", {})
+        extra = result.get("extra") or {}
+        metadata = extra.get("metadata") or {}
+        start = result.get("start") or {}
 
-        vulnerability_classes = metadata.get(
-            "vulnerability_class", []
-        )
-
-        vulnerability = (
-            vulnerability_classes[0]
-            if vulnerability_classes
-            else "Security Issue"
-        )
-
-        cwe_list = metadata.get("cwe", [])
-        cwe = cwe_list[0] if cwe_list else "Unknown"
-
-        owasp_list = metadata.get("owasp", [])
-        owasp = owasp_list[0] if owasp_list else "Unknown"
-
+        rule_id = result.get("check_id", "unknown")
         file_path = result.get("path", "Unknown")
-        line = result.get("start", {}).get("line", 0)
+        line = start.get("line", 0)
 
-        # Use the vulnerability, file, line, and code
-        # to avoid removing distinct findings.
+        vulnerability = first_metadata_value(
+            metadata.get("vulnerability_class"),
+            "Security Issue"
+        )
+
+        cwe = first_metadata_value(
+            metadata.get("cwe")
+        )
+
+        owasp = first_metadata_value(
+            metadata.get("owasp")
+        )
+
+        confidence = str(
+            metadata.get("confidence", "UNKNOWN")
+        ).upper()
+
+        semgrep_severity = str(
+            extra.get("severity", "UNKNOWN")
+        ).upper()
+
         code = get_code_snippet(file_path, line)
 
+        # Preserve findings from different rules at the same location.
         duplicate_key = (
-            vulnerability,
+            rule_id,
             file_path,
             line,
             code
@@ -68,19 +100,13 @@ def normalize_findings(semgrep_data):
 
         seen.add(duplicate_key)
 
-        confidence = metadata.get("confidence", "UNKNOWN")
-
-        # Preserve the original Semgrep severity.
-        semgrep_severity = extra.get("severity", "UNKNOWN")
-
-        # Calculate our own risk level.
         risk_level = calculate_risk(
             vulnerability,
             confidence
         )
 
-
-        finding = {
+        findings.append({
+            "rule_id": rule_id,
             "vulnerability": vulnerability,
             "semgrep_severity": semgrep_severity,
             "severity": risk_level,
@@ -94,16 +120,17 @@ def normalize_findings(semgrep_data):
                 "message",
                 "Security vulnerability detected."
             ),
-            "recommendation": get_recommendation(vulnerability, file_path)
-        }
-
-        findings.append(finding)
+            "recommendation": get_recommendation(
+                vulnerability,
+                file_path
+            )
+        })
 
     return findings
 
 
 def get_recommendation(vulnerability, file_path=""):
-    """Return security recommendations appropriate to the source language."""
+    """Return a recommendation based on vulnerability and file type."""
 
     vulnerability = (vulnerability or "").strip().lower()
     file_path = (file_path or "").lower()
@@ -112,8 +139,8 @@ def get_recommendation(vulnerability, file_path=""):
         if file_path.endswith(".py"):
             return (
                 "Use parameterized SQL queries instead of string "
-                "concatenation. For SQLite, use placeholders such as "
-                "'?' and pass user input as query parameters."
+                "concatenation. For SQLite, use '?' placeholders and "
+                "pass user input separately as query parameters."
             )
 
         if file_path.endswith(".java"):
@@ -121,6 +148,18 @@ def get_recommendation(vulnerability, file_path=""):
                 "Use java.sql.PreparedStatement with parameterized "
                 "queries, or a safe ORM, instead of building SQL "
                 "queries using user input."
+            )
+
+        if file_path.endswith(".cs"):
+            return (
+                "Use parameterized SQL commands with SqlParameter "
+                "instead of concatenating user input into SQL."
+            )
+
+        if file_path.endswith((".js", ".ts")):
+            return (
+                "Use parameterized queries supported by your database "
+                "driver instead of concatenating request input into SQL."
             )
 
         return (
@@ -132,6 +171,13 @@ def get_recommendation(vulnerability, file_path=""):
         return (
             "Encode untrusted output appropriately and use your "
             "framework's built-in output-escaping features."
+        )
+
+    if "cross-site request forgery" in vulnerability or "csrf" in vulnerability:
+        return (
+            "Apply appropriate CSRF protection to state-changing "
+            "requests, using framework-supported tokens or equivalent "
+            "protections suited to your authentication method."
         )
 
     if "command injection" in vulnerability:

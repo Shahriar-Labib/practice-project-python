@@ -327,30 +327,30 @@
 
             <div class="project-info">
                 <p><strong>Project:</strong> D:\Multi-Framework Automated Static Code Analysis System for practice project\multi-framework-security-scanner\tests</p>
-                <p><strong>Framework:</strong> Java (framework not identified), FastAPI</p>
-                <p><strong>Generated:</strong> 2026-10-19 19:47:58 UTC</p>
+                <p><strong>Framework:</strong> Java (framework not identified), FastAPI, Express.js, .NET</p>
+                <p><strong>Generated:</strong> 2026-10-20 21:22:03 UTC</p>
             </div>
         </header>
 
         <section class="summary">
             <div class="summary-card">
                 <p>Total Findings</p>
-                <div class="number">3</div>
+                <div class="number">8</div>
             </div>
 
             <div class="summary-card">
                 <p>High Risk</p>
-                <div class="number high-text">2</div>
+                <div class="number high-text">3</div>
             </div>
 
             <div class="summary-card">
                 <p>Medium Risk</p>
-                <div class="number medium-text">1</div>
+                <div class="number medium-text">4</div>
             </div>
 
             <div class="summary-card">
                 <p>Low Risk</p>
-                <div class="number low-text">0</div>
+                <div class="number low-text">1</div>
             </div>
         </section>
 
@@ -386,17 +386,25 @@
 
             <div class="metadata">
                 <p>
+                    <strong>Rule ID:</strong>
+                    <code>java.spring.security.injection.tainted-sql-string.tainted-sql-string</code>
+                </p>
+                <p>
                     <strong>File:</strong>
                     <code>D:\Multi-Framework Automated Static Code Analysis System for practice project\multi-framework-security-scanner\tests\VulnerableController.java</code>
                 </p>
                 <p>
-                    <strong>Line:</strong>
+                    <strong>Reported line:</strong>
                     19
                 </p>
             </div>
 
             <h3>Vulnerable Code</h3>
-            <pre><code>String query = &quot;SELECT * FROM users WHERE username=&#x27;&quot; + username + &quot;&#x27;&quot;;</code></pre>
+            <pre><code>  17 |         );
+  18 | 
+&gt; 19 |         String query = &quot;SELECT * FROM users WHERE username=&#x27;&quot; + username + &quot;&#x27;&quot;;
+  20 | 
+  21 |         Statement statement = connection.createStatement();</code></pre>
 
             <h3>Description</h3>
             <p>User data flows into this manually-constructed SQL string. User data can be safely inserted into SQL strings using prepared statements or an object-relational mapper (ORM). Manually-constructed SQL strings is a possible indicator of SQL injection, which could let an attacker steal or manipulate data from the database. Instead, use prepared statements (`connection.PreparedStatement`) or a safe library.</p>
@@ -447,17 +455,25 @@
 
             <div class="metadata">
                 <p>
+                    <strong>Rule ID:</strong>
+                    <code>java.lang.security.audit.formatted-sql-string.formatted-sql-string</code>
+                </p>
+                <p>
                     <strong>File:</strong>
                     <code>D:\Multi-Framework Automated Static Code Analysis System for practice project\multi-framework-security-scanner\tests\VulnerableController.java</code>
                 </p>
                 <p>
-                    <strong>Line:</strong>
+                    <strong>Reported line:</strong>
                     22
                 </p>
             </div>
 
             <h3>Vulnerable Code</h3>
-            <pre><code>ResultSet result = statement.executeQuery(query);</code></pre>
+            <pre><code>  20 | 
+  21 |         Statement statement = connection.createStatement();
+&gt; 22 |         ResultSet result = statement.executeQuery(query);
+  23 | 
+  24 |         return &quot;Search completed&quot;;</code></pre>
 
             <h3>Description</h3>
             <p>Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using &#x27;connection.prepareStatement&#x27;.</p>
@@ -498,6 +514,75 @@
 
             <div class="badge-row">
                 <span class="label-badge">
+                    Semgrep Severity: WARNING
+                </span>
+
+                <span class="label-badge">
+                    Detection Confidence: LOW
+                </span>
+            </div>
+
+            <div class="metadata">
+                <p>
+                    <strong>Rule ID:</strong>
+                    <code>java.lang.security.audit.sqli.jdbc-sqli.jdbc-sqli</code>
+                </p>
+                <p>
+                    <strong>File:</strong>
+                    <code>D:\Multi-Framework Automated Static Code Analysis System for practice project\multi-framework-security-scanner\tests\VulnerableController.java</code>
+                </p>
+                <p>
+                    <strong>Reported line:</strong>
+                    22
+                </p>
+            </div>
+
+            <h3>Vulnerable Code</h3>
+            <pre><code>  20 | 
+  21 |         Statement statement = connection.createStatement();
+&gt; 22 |         ResultSet result = statement.executeQuery(query);
+  23 | 
+  24 |         return &quot;Search completed&quot;;</code></pre>
+
+            <h3>Description</h3>
+            <p>Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using &#x27;connection.prepareStatement&#x27;.</p>
+
+            <div class="reference">
+                <p>
+                    <strong>CWE:</strong>
+                    CWE-89: Improper Neutralization of Special Elements used in an SQL Command (&#x27;SQL Injection&#x27;)
+                </p>
+                <p>
+                    <strong>OWASP:</strong>
+                    A01:2017 - Injection
+                </p>
+            </div>
+
+            <div class="recommendation">
+                <h3>Recommended Fix</h3>
+                <p>Use java.sql.PreparedStatement with parameterized queries, or a safe ORM, instead of building SQL queries using user input.</p>
+            </div>
+        </article>
+        
+
+        <article class="finding">
+            <div class="finding-heading">
+                <div>
+                    <p class="finding-number">
+                        FINDING #4
+                    </p>
+                    <h2>
+                        SQL Injection
+                    </h2>
+                </div>
+
+                <span class="badge risk-medium">
+                    MEDIUM RISK
+                </span>
+            </div>
+
+            <div class="badge-row">
+                <span class="label-badge">
                     Semgrep Severity: ERROR
                 </span>
 
@@ -508,17 +593,25 @@
 
             <div class="metadata">
                 <p>
+                    <strong>Rule ID:</strong>
+                    <code>python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query</code>
+                </p>
+                <p>
                     <strong>File:</strong>
                     <code>D:\Multi-Framework Automated Static Code Analysis System for practice project\multi-framework-security-scanner\tests\python_test\app.py</code>
                 </p>
                 <p>
-                    <strong>Line:</strong>
+                    <strong>Reported line:</strong>
                     14
                 </p>
             </div>
 
             <h3>Vulnerable Code</h3>
-            <pre><code>result = connection.execute(query).fetchall()</code></pre>
+            <pre><code>  12 |     query = &quot;SELECT * FROM users WHERE username = &#x27;&quot; + username + &quot;&#x27;&quot;
+  13 | 
+&gt; 14 |     result = connection.execute(query).fetchall()
+  15 | 
+  16 |     connection.close()</code></pre>
 
             <h3>Description</h3>
             <p>Avoiding SQL string concatenation: untrusted input concatenated with raw SQL query can result in SQL Injection. In order to execute raw query safely, prepared statement should be used. SQLAlchemy provides TextualSQL to easily used prepared statement with named parameters. For complex SQL composition, use SQL Expression Language or Schema Definition Language. In most cases, SQLAlchemy ORM will be a better option.</p>
@@ -536,7 +629,283 @@
 
             <div class="recommendation">
                 <h3>Recommended Fix</h3>
-                <p>Use parameterized SQL queries instead of string concatenation. For SQLite, use placeholders such as &#x27;?&#x27; and pass user input as query parameters.</p>
+                <p>Use parameterized SQL queries instead of string concatenation. For SQLite, use &#x27;?&#x27; placeholders and pass user input separately as query parameters.</p>
+            </div>
+        </article>
+        
+
+        <article class="finding">
+            <div class="finding-heading">
+                <div>
+                    <p class="finding-number">
+                        FINDING #5
+                    </p>
+                    <h2>
+                        SQL Injection
+                    </h2>
+                </div>
+
+                <span class="badge risk-medium">
+                    MEDIUM RISK
+                </span>
+            </div>
+
+            <div class="badge-row">
+                <span class="label-badge">
+                    Semgrep Severity: ERROR
+                </span>
+
+                <span class="label-badge">
+                    Detection Confidence: UNKNOWN
+                </span>
+            </div>
+
+            <div class="metadata">
+                <p>
+                    <strong>Rule ID:</strong>
+                    <code>rules.custom.csharp.sql-injection</code>
+                </p>
+                <p>
+                    <strong>File:</strong>
+                    <code>tests\dotnet_test\Program.cs</code>
+                </p>
+                <p>
+                    <strong>Reported line:</strong>
+                    15
+                </p>
+            </div>
+
+            <h3>Vulnerable Code</h3>
+            <pre><code>  13 | 
+  14 |     var query =
+&gt; 15 |         &quot;SELECT * FROM users WHERE username = &#x27;&quot; + username + &quot;&#x27;&quot;;
+  16 | 
+  17 |     using var command = connection.CreateCommand();</code></pre>
+
+            <h3>Description</h3>
+            <p>Potential SQL injection: user input is concatenated into a SQL query. Use parameterized queries.</p>
+
+            <div class="reference">
+                <p>
+                    <strong>CWE:</strong>
+                    CWE-89: SQL Injection
+                </p>
+                <p>
+                    <strong>OWASP:</strong>
+                    Unknown
+                </p>
+            </div>
+
+            <div class="recommendation">
+                <h3>Recommended Fix</h3>
+                <p>Use parameterized SQL commands with SqlParameter instead of concatenating user input into SQL.</p>
+            </div>
+        </article>
+        
+
+        <article class="finding">
+            <div class="finding-heading">
+                <div>
+                    <p class="finding-number">
+                        FINDING #6
+                    </p>
+                    <h2>
+                        SQL Injection
+                    </h2>
+                </div>
+
+                <span class="badge risk-high">
+                    HIGH RISK
+                </span>
+            </div>
+
+            <div class="badge-row">
+                <span class="label-badge">
+                    Semgrep Severity: ERROR
+                </span>
+
+                <span class="label-badge">
+                    Detection Confidence: MEDIUM
+                </span>
+            </div>
+
+            <div class="metadata">
+                <p>
+                    <strong>Rule ID:</strong>
+                    <code>csharp.lang.security.sqli.csharp-sqli.csharp-sqli</code>
+                </p>
+                <p>
+                    <strong>File:</strong>
+                    <code>tests\dotnet_test\Program.cs</code>
+                </p>
+                <p>
+                    <strong>Reported line:</strong>
+                    18
+                </p>
+            </div>
+
+            <h3>Vulnerable Code</h3>
+            <pre><code>  16 | 
+  17 |     using var command = connection.CreateCommand();
+&gt; 18 |     command.CommandText = query;
+  19 | 
+  20 |     using var reader = command.ExecuteReader();</code></pre>
+
+            <h3>Description</h3>
+            <p>Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements instead. You can obtain a PreparedStatement using &#x27;SqlCommand&#x27; and &#x27;SqlParameter&#x27;.</p>
+
+            <div class="reference">
+                <p>
+                    <strong>CWE:</strong>
+                    CWE-89: Improper Neutralization of Special Elements used in an SQL Command (&#x27;SQL Injection&#x27;)
+                </p>
+                <p>
+                    <strong>OWASP:</strong>
+                    A01:2017 - Injection
+                </p>
+            </div>
+
+            <div class="recommendation">
+                <h3>Recommended Fix</h3>
+                <p>Use parameterized SQL commands with SqlParameter instead of concatenating user input into SQL.</p>
+            </div>
+        </article>
+        
+
+        <article class="finding">
+            <div class="finding-heading">
+                <div>
+                    <p class="finding-number">
+                        FINDING #7
+                    </p>
+                    <h2>
+                        Cross-Site Request Forgery (CSRF)
+                    </h2>
+                </div>
+
+                <span class="badge risk-low">
+                    LOW RISK
+                </span>
+            </div>
+
+            <div class="badge-row">
+                <span class="label-badge">
+                    Semgrep Severity: INFO
+                </span>
+
+                <span class="label-badge">
+                    Detection Confidence: LOW
+                </span>
+            </div>
+
+            <div class="metadata">
+                <p>
+                    <strong>Rule ID:</strong>
+                    <code>javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage</code>
+                </p>
+                <p>
+                    <strong>File:</strong>
+                    <code>tests\node_test\app.js</code>
+                </p>
+                <p>
+                    <strong>Reported line:</strong>
+                    5
+                </p>
+            </div>
+
+            <h3>Vulnerable Code</h3>
+            <pre><code>  3 | const sqlite3 = require(&quot;sqlite3&quot;).verbose();
+  4 | 
+&gt; 5 | const app = express();
+  6 | 
+  7 | app.get(&quot;/users&quot;, (req, res) =&gt; {</code></pre>
+
+            <h3>Description</h3>
+            <p>A CSRF middleware was not detected in your express application. Ensure you are either using one such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.</p>
+
+            <div class="reference">
+                <p>
+                    <strong>CWE:</strong>
+                    CWE-352: Cross-Site Request Forgery (CSRF)
+                </p>
+                <p>
+                    <strong>OWASP:</strong>
+                    A01:2021 - Broken Access Control
+                </p>
+            </div>
+
+            <div class="recommendation">
+                <h3>Recommended Fix</h3>
+                <p>Apply appropriate CSRF protection to state-changing requests, using framework-supported tokens or equivalent protections suited to your authentication method.</p>
+            </div>
+        </article>
+        
+
+        <article class="finding">
+            <div class="finding-heading">
+                <div>
+                    <p class="finding-number">
+                        FINDING #8
+                    </p>
+                    <h2>
+                        SQL Injection
+                    </h2>
+                </div>
+
+                <span class="badge risk-medium">
+                    MEDIUM RISK
+                </span>
+            </div>
+
+            <div class="badge-row">
+                <span class="label-badge">
+                    Semgrep Severity: ERROR
+                </span>
+
+                <span class="label-badge">
+                    Detection Confidence: UNKNOWN
+                </span>
+            </div>
+
+            <div class="metadata">
+                <p>
+                    <strong>Rule ID:</strong>
+                    <code>rules.custom.javascript.sql-injection</code>
+                </p>
+                <p>
+                    <strong>File:</strong>
+                    <code>tests\node_test\app.js</code>
+                </p>
+                <p>
+                    <strong>Reported line:</strong>
+                    10
+                </p>
+            </div>
+
+            <h3>Vulnerable Code</h3>
+            <pre><code>   8 |     const username = req.query.username;
+   9 | 
+&gt; 10 |     const query =
+  11 |         &quot;SELECT * FROM users WHERE username = &#x27;&quot; + username + &quot;&#x27;&quot;;
+  12 | </code></pre>
+
+            <h3>Description</h3>
+            <p>Potential SQL injection: request-controlled input may be concatenated into a SQL query. Use parameterized queries.</p>
+
+            <div class="reference">
+                <p>
+                    <strong>CWE:</strong>
+                    CWE-89: SQL Injection
+                </p>
+                <p>
+                    <strong>OWASP:</strong>
+                    Unknown
+                </p>
+            </div>
+
+            <div class="recommendation">
+                <h3>Recommended Fix</h3>
+                <p>Use parameterized queries supported by your database driver instead of concatenating request input into SQL.</p>
             </div>
         </article>
         

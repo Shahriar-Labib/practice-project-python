@@ -1,0 +1,21 @@
+
+rules:
+  - id: custom.javascript.sql-injection
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    message: >-
+      Potential SQL injection: request-controlled input may be
+      concatenated into a SQL query. Use parameterized queries.
+    metadata:
+      category: security
+      cwe:
+        - "CWE-89: SQL Injection"
+      vulnerability_class:
+        - SQL Injection
+    pattern-either:
+      - pattern: |
+          const $QUERY = "..." + $INPUT + "..."
+      - pattern: |
+          let $QUERY = "..." + $INPUT + "..."

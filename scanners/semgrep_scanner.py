@@ -58,18 +58,68 @@ def find_python_files(project_path):
     return python_files
 
 
+def find_javascript_files(project_path):
+    """Find JavaScript source files, excluding generated directories."""
+
+    ignored = {
+        ".git", ".idea", ".venv", "venv", "__pycache__",
+        "node_modules", "target", "build", "dist", "bin", "obj",
+    }
+
+    project = Path(project_path)
+
+    return [
+        file for file in project.rglob("*")
+        if file.is_file()
+        and file.suffix.lower() in {".js", ".jsx", ".mjs", ".cjs"}
+        and not any(
+            part.lower() in ignored
+            for part in file.relative_to(project).parts[:-1]
+        )
+    ]
+
+
+def find_csharp_files(project_path):
+    """Find C# source files, excluding generated directories."""
+
+    ignored = {
+        ".git", ".idea", ".venv", "venv", "__pycache__",
+        "node_modules", "target", "build", "dist", "bin", "obj",
+    }
+
+    project = Path(project_path)
+
+    return [
+        file for file in project.rglob("*.cs")
+        if file.is_file()
+        and not any(
+            part.lower() in ignored
+            for part in file.relative_to(project).parts[:-1]
+        )
+    ]
+
 
 def scan_project(project_path: str):
 
     project = Path(project_path).resolve()
 
-    java_files = find_java_files(project)
-    python_files = find_python_files(project)
 
-    source_files = java_files + python_files
+    java_files = find_java_files(project_path)
+    python_files = find_python_files(project_path)
+    javascript_files = find_javascript_files(project_path)
+    csharp_files = find_csharp_files(project_path)
+
+    source_files = (
+        java_files
+        + python_files
+        + javascript_files
+        + csharp_files
+    )
 
     print(f"Java files found: {len(java_files)}")
     print(f"Python files found: {len(python_files)}")
+    print(f"JavaScript files found: {len(javascript_files)}")
+    print(f"C# files found: {len(csharp_files)}")
 
     if not source_files:
         print("No supported source files found.")
@@ -87,11 +137,14 @@ def scan_project(project_path: str):
     command = [
         "semgrep",
         "scan",
-        "--config",
-        "auto",
+        "--config", "auto",
+        "--config", "rules/javascript-sql-injection.yaml",
+        "--config", "rules/csharp-sql-injection.yaml",
         "--no-git-ignore",
-        "--json"
+        "--json",
     ]
+
+
 
     # Add all supported source files explicitly
     command.extend(str(file) for file in source_files)
@@ -168,6 +221,7 @@ if __name__ == "__main__":
     for finding in normalized:
 
         print("\n------------------------------")
+        print("Rule ID:", finding.get("rule_id", "Missing"))
         print("Vulnerability:", finding["vulnerability"])
         print("Risk:", finding["severity"])
         print("Confidence:", finding["confidence"])
