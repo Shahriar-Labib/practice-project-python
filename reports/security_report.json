@@ -1,7 +1,7 @@
 {
     "project": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests",
     "framework": "Java (framework not identified), FastAPI, Express.js, .NET",
-    "scan_time_utc": "2026-10-20T21:22:03.280576+00:00",
+    "scan_time_utc": "2026-10-21T16:02:05.261809+00:00",
     "summary": {
         "total_findings": 8,
         "high": 3,
@@ -19,7 +19,10 @@
             "line": 19,
             "code": "  17 |         );\n  18 | \n> 19 |         String query = \"SELECT * FROM users WHERE username='\" + username + \"'\";\n  20 | \n  21 |         Statement statement = connection.createStatement();",
             "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
-            "owasp": "A01:2017 - Injection",
+            "owasp": [
+                "A03:2021 - Injection",
+                "A05:2025 - Injection"
+            ],
             "description": "User data flows into this manually-constructed SQL string. User data can be safely inserted into SQL strings using prepared statements or an object-relational mapper (ORM). Manually-constructed SQL strings is a possible indicator of SQL injection, which could let an attacker steal or manipulate data from the database. Instead, use prepared statements (`connection.PreparedStatement`) or a safe library.",
             "recommendation": "Use java.sql.PreparedStatement with parameterized queries, or a safe ORM, instead of building SQL queries using user input."
         },
@@ -33,7 +36,10 @@
             "line": 22,
             "code": "  20 | \n  21 |         Statement statement = connection.createStatement();\n> 22 |         ResultSet result = statement.executeQuery(query);\n  23 | \n  24 |         return \"Search completed\";",
             "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
-            "owasp": "A01:2017 - Injection",
+            "owasp": [
+                "A03:2021 - Injection",
+                "A05:2025 - Injection"
+            ],
             "description": "Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.",
             "recommendation": "Use java.sql.PreparedStatement with parameterized queries, or a safe ORM, instead of building SQL queries using user input."
         },
@@ -47,9 +53,78 @@
             "line": 22,
             "code": "  20 | \n  21 |         Statement statement = connection.createStatement();\n> 22 |         ResultSet result = statement.executeQuery(query);\n  23 | \n  24 |         return \"Search completed\";",
             "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
-            "owasp": "A01:2017 - Injection",
+            "owasp": [
+                "A03:2021 - Injection",
+                "A05:2025 - Injection"
+            ],
             "description": "Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements (java.sql.PreparedStatement) instead. You can obtain a PreparedStatement using 'connection.prepareStatement'.",
             "recommendation": "Use java.sql.PreparedStatement with parameterized queries, or a safe ORM, instead of building SQL queries using user input."
+        },
+        {
+            "rule_id": "rules.custom.csharp.sql-injection",
+            "vulnerability": "SQL Injection",
+            "semgrep_severity": "ERROR",
+            "severity": "MEDIUM",
+            "confidence": "LOW",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\dotnet_test\\Program.cs",
+            "line": 15,
+            "code": "  13 | \n  14 |     var query =\n> 15 |         \"SELECT * FROM users WHERE username = '\" + username + \"'\";\n  16 | \n  17 |     using var command = connection.CreateCommand();",
+            "cwe": "CWE-89: SQL Injection",
+            "owasp": [
+                "A03:2021 - Injection"
+            ],
+            "description": "Potential SQL injection: user input is concatenated into a SQL query. Use parameterized queries.",
+            "recommendation": "Use parameterized SQL commands with SqlParameter instead of concatenating user input into SQL."
+        },
+        {
+            "rule_id": "csharp.lang.security.sqli.csharp-sqli.csharp-sqli",
+            "vulnerability": "SQL Injection",
+            "semgrep_severity": "ERROR",
+            "severity": "HIGH",
+            "confidence": "MEDIUM",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\dotnet_test\\Program.cs",
+            "line": 18,
+            "code": "  16 | \n  17 |     using var command = connection.CreateCommand();\n> 18 |     command.CommandText = query;\n  19 | \n  20 |     using var reader = command.ExecuteReader();",
+            "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+            "owasp": [
+                "A03:2021 - Injection",
+                "A05:2025 - Injection"
+            ],
+            "description": "Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements instead. You can obtain a PreparedStatement using 'SqlCommand' and 'SqlParameter'.",
+            "recommendation": "Use parameterized SQL commands with SqlParameter instead of concatenating user input into SQL."
+        },
+        {
+            "rule_id": "javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
+            "vulnerability": "Cross-Site Request Forgery (CSRF)",
+            "semgrep_severity": "INFO",
+            "severity": "LOW",
+            "confidence": "LOW",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\node_test\\app.js",
+            "line": 5,
+            "code": "  3 | const sqlite3 = require(\"sqlite3\").verbose();\n  4 | \n> 5 | const app = express();\n  6 | \n  7 | app.get(\"/users\", (req, res) => {",
+            "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+            "owasp": [
+                "A01:2021 - Broken Access Control",
+                "A01:2025 - Broken Access Control"
+            ],
+            "description": "A CSRF middleware was not detected in your express application. Ensure you are either using one such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.",
+            "recommendation": "Apply appropriate CSRF protection to state-changing requests, using framework-supported tokens or equivalent protections suited to your authentication method."
+        },
+        {
+            "rule_id": "rules.custom.javascript.sql-injection",
+            "vulnerability": "SQL Injection",
+            "semgrep_severity": "ERROR",
+            "severity": "MEDIUM",
+            "confidence": "LOW",
+            "file": "D:\\Multi-Framework Automated Static Code Analysis System for practice project\\multi-framework-security-scanner\\tests\\node_test\\app.js",
+            "line": 10,
+            "code": "   8 |     const username = req.query.username;\n   9 | \n> 10 |     const query =\n  11 |         \"SELECT * FROM users WHERE username = '\" + username + \"'\";\n  12 | ",
+            "cwe": "CWE-89: SQL Injection",
+            "owasp": [
+                "A03:2021 - Injection"
+            ],
+            "description": "Potential SQL injection: request-controlled input may be concatenated into a SQL query. Use parameterized queries.",
+            "recommendation": "Use parameterized queries supported by your database driver instead of concatenating request input into SQL."
         },
         {
             "rule_id": "python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query",
@@ -61,65 +136,12 @@
             "line": 14,
             "code": "  12 |     query = \"SELECT * FROM users WHERE username = '\" + username + \"'\"\n  13 | \n> 14 |     result = connection.execute(query).fetchall()\n  15 | \n  16 |     connection.close()",
             "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
-            "owasp": "A01:2017 - Injection",
+            "owasp": [
+                "A03:2021 - Injection",
+                "A05:2025 - Injection"
+            ],
             "description": "Avoiding SQL string concatenation: untrusted input concatenated with raw SQL query can result in SQL Injection. In order to execute raw query safely, prepared statement should be used. SQLAlchemy provides TextualSQL to easily used prepared statement with named parameters. For complex SQL composition, use SQL Expression Language or Schema Definition Language. In most cases, SQLAlchemy ORM will be a better option.",
             "recommendation": "Use parameterized SQL queries instead of string concatenation. For SQLite, use '?' placeholders and pass user input separately as query parameters."
-        },
-        {
-            "rule_id": "rules.custom.csharp.sql-injection",
-            "vulnerability": "SQL Injection",
-            "semgrep_severity": "ERROR",
-            "severity": "MEDIUM",
-            "confidence": "UNKNOWN",
-            "file": "tests\\dotnet_test\\Program.cs",
-            "line": 15,
-            "code": "  13 | \n  14 |     var query =\n> 15 |         \"SELECT * FROM users WHERE username = '\" + username + \"'\";\n  16 | \n  17 |     using var command = connection.CreateCommand();",
-            "cwe": "CWE-89: SQL Injection",
-            "owasp": "Unknown",
-            "description": "Potential SQL injection: user input is concatenated into a SQL query. Use parameterized queries.",
-            "recommendation": "Use parameterized SQL commands with SqlParameter instead of concatenating user input into SQL."
-        },
-        {
-            "rule_id": "csharp.lang.security.sqli.csharp-sqli.csharp-sqli",
-            "vulnerability": "SQL Injection",
-            "semgrep_severity": "ERROR",
-            "severity": "HIGH",
-            "confidence": "MEDIUM",
-            "file": "tests\\dotnet_test\\Program.cs",
-            "line": 18,
-            "code": "  16 | \n  17 |     using var command = connection.CreateCommand();\n> 18 |     command.CommandText = query;\n  19 | \n  20 |     using var reader = command.ExecuteReader();",
-            "cwe": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
-            "owasp": "A01:2017 - Injection",
-            "description": "Detected a formatted string in a SQL statement. This could lead to SQL injection if variables in the SQL statement are not properly sanitized. Use a prepared statements instead. You can obtain a PreparedStatement using 'SqlCommand' and 'SqlParameter'.",
-            "recommendation": "Use parameterized SQL commands with SqlParameter instead of concatenating user input into SQL."
-        },
-        {
-            "rule_id": "javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage",
-            "vulnerability": "Cross-Site Request Forgery (CSRF)",
-            "semgrep_severity": "INFO",
-            "severity": "LOW",
-            "confidence": "LOW",
-            "file": "tests\\node_test\\app.js",
-            "line": 5,
-            "code": "  3 | const sqlite3 = require(\"sqlite3\").verbose();\n  4 | \n> 5 | const app = express();\n  6 | \n  7 | app.get(\"/users\", (req, res) => {",
-            "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
-            "owasp": "A01:2021 - Broken Access Control",
-            "description": "A CSRF middleware was not detected in your express application. Ensure you are either using one such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.",
-            "recommendation": "Apply appropriate CSRF protection to state-changing requests, using framework-supported tokens or equivalent protections suited to your authentication method."
-        },
-        {
-            "rule_id": "rules.custom.javascript.sql-injection",
-            "vulnerability": "SQL Injection",
-            "semgrep_severity": "ERROR",
-            "severity": "MEDIUM",
-            "confidence": "UNKNOWN",
-            "file": "tests\\node_test\\app.js",
-            "line": 10,
-            "code": "   8 |     const username = req.query.username;\n   9 | \n> 10 |     const query =\n  11 |         \"SELECT * FROM users WHERE username = '\" + username + \"'\";\n  12 | ",
-            "cwe": "CWE-89: SQL Injection",
-            "owasp": "Unknown",
-            "description": "Potential SQL injection: request-controlled input may be concatenated into a SQL query. Use parameterized queries.",
-            "recommendation": "Use parameterized queries supported by your database driver instead of concatenating request input into SQL."
         }
     ]
 }

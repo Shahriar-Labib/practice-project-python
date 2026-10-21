@@ -10,8 +10,11 @@ rules:
       concatenated into a SQL query. Use parameterized queries.
     metadata:
       category: security
+      confidence: LOW
       cwe:
         - "CWE-89: SQL Injection"
+      owasp:
+        - "A03:2021 - Injection"
       vulnerability_class:
         - SQL Injection
     pattern-either:

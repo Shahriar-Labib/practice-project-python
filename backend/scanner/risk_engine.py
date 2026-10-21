@@ -1,39 +1,39 @@
 
 def calculate_risk(vulnerability, confidence):
     """
-    Calculate risk using vulnerability severity and confidence.
+    Estimate risk from vulnerability type and detection confidence.
 
-    Confidence affects the final risk level, but a low-confidence
-    finding is not automatically considered harmless.
+    This is a project-defined risk estimate, not proof that a
+    vulnerability is exploitable.
     """
 
     vulnerability = (vulnerability or "").strip().lower()
     confidence = (confidence or "LOW").strip().upper()
 
-    high_risk = [
+    if confidence not in {"HIGH", "MEDIUM", "LOW"}:
+        confidence = "LOW"
+
+    high_risk = (
         "sql injection",
         "command injection",
         "path traversal",
         "remote code execution",
         "insecure deserialization",
-    ]
+    )
 
-    medium_risk = [
+    medium_risk = (
         "cross-site scripting",
         "hardcoded secret",
         "weak cryptography",
         "sensitive information exposure",
-    ]
+    )
 
-    if vulnerability in high_risk:
-        if confidence == "HIGH":
+    if any(term in vulnerability for term in high_risk):
+        if confidence in {"HIGH", "MEDIUM"}:
             return "HIGH"
-        elif confidence == "MEDIUM":
-            return "HIGH"
-        else:
-            return "MEDIUM"
+        return "MEDIUM"
 
-    if vulnerability in medium_risk:
+    if any(term in vulnerability for term in medium_risk):
         if confidence == "HIGH":
             return "MEDIUM"
         return "LOW"

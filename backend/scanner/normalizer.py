@@ -72,10 +72,23 @@ def normalize_findings(semgrep_data):
         cwe = first_metadata_value(
             metadata.get("cwe")
         )
+        
+        raw_owasp = metadata.get("owasp", [])
 
-        owasp = first_metadata_value(
-            metadata.get("owasp")
-        )
+        if isinstance(raw_owasp, str):
+            raw_owasp = [raw_owasp]
+
+        owasp = []
+        for value in raw_owasp:
+            value = value.strip()
+
+            # Normalize the legacy 2017 Injection label.
+            if value == "A01:2017 - Injection":
+                value = "A03:2021 - Injection"
+
+            if value and value not in owasp:
+                owasp.append(value)
+
 
         confidence = str(
             metadata.get("confidence", "UNKNOWN")

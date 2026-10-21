@@ -1,0 +1,15 @@
+{
+    "evaluation_type": "SQL injection fixture-level evaluation",
+    "true_positives": 4,
+    "false_positives": 0,
+    "true_negatives": 4,
+    "false_negatives": 0,
+    "precision_percent": 100.0,
+    "recall_percent": 100.0,
+    "f1_score_percent": 100.0,
+    "accuracy_percent": 100.0,
+    "vulnerable_fixtures": 4,
+    "safe_fixtures": 4,
+    "sql_injection_findings_in_vulnerable_scan": 7,
+    "sql_injection_findings_in_safe_scan": 0
+}
